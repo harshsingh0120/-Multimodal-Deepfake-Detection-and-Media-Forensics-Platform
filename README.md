@@ -308,10 +308,14 @@ python -m evaluation.make_eval_dataset ./eval_synth && python -m evaluation.eval
 
 - **Domain metrics:** AUC, **EER** (audio), per-generator accuracy (cross-dataset), robustness curves
   under JPEG/H.264, **ECE** (calibration). Robustness is also self-tested (`tests/test_robustness.py`).
-- **Honest evaluation:** scores are evidence indicators. **No real-world accuracy is claimed** until
-  you run the harness on a labelled dataset — the platform never reports a leak-prone in-dataset
-  number as "performance". On the labelled **synthetic self-test**, fusion reaches AUC 1.00 (validating
-  the harness, *not* real-world accuracy — see EVALUATION.md for the honest caveats).
+- **Measured on a real public dataset** (298 real/GAN-fake faces, HF `djramirezp/face-classification-dataset`):
+  **AUC 0.275, accuracy ≈ 50% — chance level.** The interpretable engine does *not* generalise to this
+  generator out of the box (its "artifacts ⇒ fake" assumption is sign-flipped when the fakes are
+  smoother than the real photos). This is reported **openly**, not hidden — see **[EVALUATION.md](EVALUATION.md)**.
+- **Honest evaluation:** scores are transparent forensic indicators, and the engine is a **baseline +
+  triage tool, not a production detector**. Thresholds are **never** tuned on the test set (the leakage
+  pitfall the brief warns about); the path to real accuracy is the trained-model plugins + calibration
+  on a held-out split, then re-running this harness.
 
 ## 🚢 Deployment
 
