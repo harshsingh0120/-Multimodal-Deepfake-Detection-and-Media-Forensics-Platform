@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-ink-950 text-slate-200 font-sans antialiased;
+  background-image: radial-gradient(
+      1200px 600px at 80% -10%,
+      rgba(20, 184, 166, 0.12),
+      transparent 60%
+    ),
+    radial-gradient(900px 500px at -10% 10%, rgba(59, 130, 246, 0.1), transparent 55%);
+  background-attachment: fixed;
+}
+
+.card {
+  @apply bg-ink-900/80 border border-ink-700/70 rounded-2xl backdrop-blur;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.09) 37%,
+    rgba(255, 255, 255, 0.04) 63%
+  );
+  background-size: 1000px 100%;
+  @apply animate-shimmer rounded-md;
+}
+
+/* Thin custom scrollbar */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  @apply bg-ink-600 rounded-full;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}

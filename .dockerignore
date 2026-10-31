@@ -1,0 +1,13 @@
+**/.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/node_modules
+frontend/dist
+backend/data
+samples
+scratch_*
+.git
+.pytest_cache
+docs/screenshots
+*.md

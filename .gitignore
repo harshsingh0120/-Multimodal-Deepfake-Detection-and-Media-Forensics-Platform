@@ -1,0 +1,41 @@
+# ---- Python ----
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ---- Env / secrets ----
+.env
+*.env
+!.env.example
+backend/.env
+frontend/.env
+
+# ---- Data / generated artifacts ----
+backend/data/
+data/
+samples/
+*.pdf
+!docs/**/*.pdf
+
+# ---- Node / frontend ----
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
