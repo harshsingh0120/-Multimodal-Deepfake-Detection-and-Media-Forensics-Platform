@@ -294,9 +294,24 @@ The always-on engine is **generator-agnostic and dataset-free** (no training, no
 
 ## 📊 Evaluation & Baselines
 
-- **Baselines (built in):** each single modality is reported independently (F8), and the fusion layer is a transparent weighted combination — so single-modality vs. fusion is directly comparable in every response.
-- **Domain metrics (model path):** AUC, **EER** (audio), per-generator accuracy (cross-dataset), robustness curves under JPEG/H.264, **ECE** (calibration). These require labelled datasets; the engine exposes calibrated probabilities ready for ECE measurement, and the robustness self-tests (`tests/test_robustness.py`) demonstrate stability under re-encoding/resize/noise.
-- **Honest evaluation:** scores are evidence indicators, not in-dataset accuracy claims; the platform never reports a single leak-prone accuracy number as "performance".
+A full evaluation harness computes **ROC-AUC, EER, accuracy/precision/recall/F1, Brier and ECE**
+for the **multimodal fusion** detector and the baselines named in the problem statement
+(**each single modality** and **simple averaging fusion**). See **[EVALUATION.md](EVALUATION.md)**.
+
+```bash
+cd backend
+# Score a labelled dataset (dataset/real/* and dataset/fake/*, or a CSV manifest):
+python -m evaluation.evaluate --data /path/to/dataset
+# Or prove the harness works on a labelled synthetic set (no download needed):
+python -m evaluation.make_eval_dataset ./eval_synth && python -m evaluation.evaluate --data ./eval_synth
+```
+
+- **Domain metrics:** AUC, **EER** (audio), per-generator accuracy (cross-dataset), robustness curves
+  under JPEG/H.264, **ECE** (calibration). Robustness is also self-tested (`tests/test_robustness.py`).
+- **Honest evaluation:** scores are evidence indicators. **No real-world accuracy is claimed** until
+  you run the harness on a labelled dataset — the platform never reports a leak-prone in-dataset
+  number as "performance". On the labelled **synthetic self-test**, fusion reaches AUC 1.00 (validating
+  the harness, *not* real-world accuracy — see EVALUATION.md for the honest caveats).
 
 ## 🚢 Deployment
 

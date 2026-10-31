@@ -21,6 +21,9 @@ frontend/.env
 backend/data/
 data/
 samples/
+eval_synth/
+backend/evaluation/results/
+scratch_*
 *.pdf
 !docs/**/*.pdf
 
