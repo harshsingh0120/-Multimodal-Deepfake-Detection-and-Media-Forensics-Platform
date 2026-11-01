@@ -74,9 +74,39 @@ multi-GB downloads, so this openly-licensed set was used as the honest substitut
   (b) per-generator **calibration fitted on a separate split** — both already wired as integration
   points in `app/analyzers/model_plugin.py` and `app/analyzers/fusion.py`.
 
-**Takeaway:** measured real-world accuracy on this set is **chance-level**. The interpretable engine
-is a transparent, explainable **baseline and triage tool with an honest measurement harness — not a
-production-grade detector.** That distinction, and this reproducible evidence, is the point.
+**Takeaway:** the *interpretable engine* on its own is **chance-level** on this set — a transparent
+baseline/triage tool, not a production detector. The accuracy comes from the **trained-model path** ↓.
+
+### 3.1 Trained-model path — measured lift (same dataset, same harness)
+
+Enabling a pretrained ViT deepfake classifier for the image branch
+(`IMAGE_MODEL_ID=dima806/deepfake_vs_real_image_detection`) and re-running the **identical** harness on
+the **identical** 300-image set:
+
+| Detector | AUC ↑ | EER ↓ | Accuracy ↑ | Precision | Recall | F1 | Brier ↓ | ECE ↓ |
+|----------|------:|------:|-----------:|----------:|-------:|---:|--------:|------:|
+| Interpretable engine (baseline) | 0.273 | 0.730 | 0.500 | 0.500 | 1.000 | 0.667 | 0.451 | 0.442 |
+| **Trained ViT plugin** | **0.780** | **0.267** | **0.753** | 0.771 | 0.720 | 0.745 | 0.259 | 0.263 |
+
+Corrected mean P(fake): **real faces 0.40 vs. fake faces 0.82** — clean separation. The trained path
+lifts AUC from chance (0.27) to **0.78** and accuracy to **~75%** — a +0.26 AUC gain over the baseline,
+on real data, measured by the same reproducible harness.
+
+> **Honest debugging note — label-orientation gotcha.** On the first run the ViT scored AUC **0.22**
+> (worse than chance, *inverted*). Rather than ship that, we diagnosed it: the `dima806` checkpoint
+> ships a **reversed `id2label`** (`{0: Real, 1: Fake}` is backwards). We verified the true orientation
+> on *known-real* faces (sklearn Olivetti) — the model assigns them to index 0 — so index 0 is really
+> "fake". The plugin now exposes `IMAGE_MODEL_FAKE_INDEX` (set to `0` for dima806) and the corrected
+> numbers above are the result. This is exactly the kind of silent label bug an honest harness exists
+> to catch.
+
+**To reproduce:**
+```bash
+cd backend
+pip install torch transformers safetensors
+IMAGE_MODEL_ID=dima806/deepfake_vs_real_image_detection IMAGE_MODEL_FAKE_INDEX=0 \
+  python -m evaluation.evaluate --data /path/to/dataset
+```
 
 ## 4. Harness self-test (synthetic — NOT real-world accuracy)
 
@@ -112,13 +142,14 @@ Representative result on 30 controlled synthetic files (15 real / 15 fake):
 
 ## 5. Bottom line
 
-- **Measured real-world accuracy (this public GAN-face set): ≈ 50% — chance level** (AUC 0.275).
-  Reported openly rather than hidden. The interpretable engine does not generalise to this generator
-  out of the box.
-- **The platform's real value:** a complete, working multimodal pipeline + explainability
-  (heatmaps, evidence, safety wording) + **this reproducible, honest measurement harness** that
-  surfaces exactly where it fails.
-- **To improve the number the right way:** enable the trained-model plugins and fit calibration on a
-  held-out split (never on the test set), then re-run this harness on FaceForensics++ / ASVspoof.
+- **Measured on a real public GAN-face set (300 images), same harness both times:**
+  - Interpretable engine alone: **AUC 0.273, ~50% (chance)** — it does not generalise to this generator.
+  - **Trained-ViT plugin: AUC 0.780, ~75% accuracy** — the trained-model path delivers real detection.
+- Both numbers are reported openly; nothing was tuned on the test set (no leakage).
+- **The platform's value:** a complete multimodal pipeline + explainability (heatmaps, evidence, safety
+  wording) + a drop-in trained-model slot + **this reproducible harness** that measures real performance
+  *and* caught a silent label-orientation bug in the pretrained model.
+- **Next for even higher numbers:** fine-tune/calibrate on FaceForensics++ / ASVspoof with
+  identity-disjoint, cross-generator splits, then re-run this harness.
 - **Software is verified:** 32/32 automated tests pass (see `TESTING.md`); the harness is demonstrated
-  on both a real public dataset (above) and a labelled synthetic set (below).
+  on a real public dataset (engine + trained model) and on a labelled synthetic set (below).

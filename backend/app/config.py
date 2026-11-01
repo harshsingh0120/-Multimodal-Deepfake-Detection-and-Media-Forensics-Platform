@@ -77,8 +77,14 @@ class Settings:
     # Fusion calibration temperature (>1 softens confidence; see analyzers/fusion.py).
     CALIBRATION_TEMPERATURE: float = _get_float("CALIBRATION_TEMPERATURE", 1.3)
 
-    # --- Optional trained-model plugins (disabled unless weights are provided) ---
-    # Paths to drop-in checkpoints; when unset the interpretable engine is used.
+    # --- Optional trained-model plugins (disabled unless provided) ---
+    # Hugging Face image-classification model id (or local dir) for the image branch,
+    # e.g. "dima806/deepfake_vs_real_image_detection". Requires torch + transformers.
+    IMAGE_MODEL_ID: str = os.getenv("IMAGE_MODEL_ID", "")
+    # Which output index is the "fake" class. -1 = auto-detect from id2label.
+    # Some published checkpoints ship a REVERSED id2label (e.g. dima806 → set this to 0).
+    IMAGE_MODEL_FAKE_INDEX: int = _get_int("IMAGE_MODEL_FAKE_INDEX", -1)
+    # Paths to drop-in torch checkpoints; when unset the interpretable engine is used.
     IMAGE_MODEL_PATH: str = os.getenv("IMAGE_MODEL_PATH", "")
     AUDIO_MODEL_PATH: str = os.getenv("AUDIO_MODEL_PATH", "")
     SYNC_MODEL_PATH: str = os.getenv("SYNC_MODEL_PATH", "")

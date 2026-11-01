@@ -90,9 +90,11 @@ def analyze_path(file_path: Path, original_name: str, size_bytes: int) -> dict:
         rep_idx = int(len(ingest.video.frames) // 2)
         rep_frame = ingest.video.frames[rep_idx]
         ia = analyze_image_bgr(rep_frame, make_heatmaps=True)
-        modalities.insert(0, _image_modality(ia, ia.score, False,
+        rep_model = try_model_score(registry, "image", rep_frame)
+        rep_score = rep_model if rep_model is not None else ia.score
+        modalities.insert(0, _image_modality(ia, rep_score, rep_model is not None,
                                              summary_prefix="Representative frame: "))
-        fuse_inputs.append(fusion_mod.Modality("image", True, ia.score, ia.confidence * 0.8))
+        fuse_inputs.append(fusion_mod.Modality("image", True, rep_score, ia.confidence * 0.8))
 
         if ingest.audio is not None:
             aa = analyze_audio(ingest.audio.samples, ingest.audio.sr)

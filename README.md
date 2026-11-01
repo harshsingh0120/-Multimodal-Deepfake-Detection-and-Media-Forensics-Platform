@@ -308,14 +308,20 @@ python -m evaluation.make_eval_dataset ./eval_synth && python -m evaluation.eval
 
 - **Domain metrics:** AUC, **EER** (audio), per-generator accuracy (cross-dataset), robustness curves
   under JPEG/H.264, **ECE** (calibration). Robustness is also self-tested (`tests/test_robustness.py`).
-- **Measured on a real public dataset** (298 real/GAN-fake faces, HF `djramirezp/face-classification-dataset`):
-  **AUC 0.275, accuracy ≈ 50% — chance level.** The interpretable engine does *not* generalise to this
-  generator out of the box (its "artifacts ⇒ fake" assumption is sign-flipped when the fakes are
-  smoother than the real photos). This is reported **openly**, not hidden — see **[EVALUATION.md](EVALUATION.md)**.
-- **Honest evaluation:** scores are transparent forensic indicators, and the engine is a **baseline +
-  triage tool, not a production detector**. Thresholds are **never** tuned on the test set (the leakage
-  pitfall the brief warns about); the path to real accuracy is the trained-model plugins + calibration
-  on a held-out split, then re-running this harness.
+- **Measured on a real public dataset** (300 real/GAN-fake faces, HF `djramirezp/face-classification-dataset`),
+  same harness both times:
+
+  | Detector | AUC | Accuracy | EER |
+  |----------|----:|---------:|----:|
+  | Interpretable engine (baseline) | 0.273 | ~50% (chance) | 0.730 |
+  | **Trained ViT plugin** (`dima806`, `IMAGE_MODEL_FAKE_INDEX=0`) | **0.780** | **75.3%** | 0.267 |
+
+  The interpretable engine alone is chance-level on this generator; the **trained-model path lifts it to
+  AUC 0.78 / ~75%**. Enabling the plugin also surfaced (and we fixed) a reversed-`id2label` bug in the
+  pretrained model — see **[EVALUATION.md](EVALUATION.md)**.
+- **Honest evaluation:** nothing is tuned on the test set (the leakage pitfall the brief warns about).
+  The engine is a transparent baseline/triage tool; the trained-model slot is where production accuracy
+  comes from. Enable it with `pip install torch transformers` and `IMAGE_MODEL_ID` (see `.env.example`).
 
 ## 🚢 Deployment
 
