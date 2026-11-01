@@ -35,9 +35,10 @@ class _HFImageClassifier:
 
     modality = "image"
 
-    def __init__(self, model_id: str, fake_index: int = -1):
+    def __init__(self, model_id: str, fake_index: int = -1, tta: bool = False):
         self.model_id = model_id
         self.fake_index_override = fake_index
+        self.tta = tta
         self._model = None
         self._proc = None
         self._torch = None
@@ -65,6 +66,13 @@ class _HFImageClassifier:
                 1 if len(id2label) > 1 else 0,
             )
 
+    def _p_fake(self, pil_img) -> float:
+        inputs = self._proc(images=pil_img, return_tensors="pt")
+        with self._torch.no_grad():
+            logits = self._model(**inputs).logits
+        probs = self._torch.softmax(logits, dim=-1)[0]
+        return float(probs[self._fake_idx].item())
+
     def predict(self, payload) -> float:
         self._ensure_loaded()
         import numpy as np
@@ -73,11 +81,23 @@ class _HFImageClassifier:
         img = payload
         if isinstance(img, np.ndarray):
             img = Image.fromarray(img[:, :, ::-1])  # BGR → RGB
-        inputs = self._proc(images=img, return_tensors="pt")
-        with self._torch.no_grad():
-            logits = self._model(**inputs).logits
-        probs = self._torch.softmax(logits, dim=-1)[0]
-        return float(probs[self._fake_idx].item())
+        p = self._p_fake(img)
+        if self.tta:  # average with the horizontal flip
+            p = 0.5 * (p + self._p_fake(img.transpose(Image.FLIP_LEFT_RIGHT)))
+        return p
+
+
+class _EnsembleImageModel:
+    """Averages P(fake) across several image models (optionally with TTA)."""
+
+    modality = "image"
+
+    def __init__(self, members: list[_HFImageClassifier]):
+        self.members = members
+
+    def predict(self, payload) -> float:
+        scores = [m.predict(payload) for m in self.members]
+        return float(sum(scores) / len(scores)) if scores else 0.0
 
 
 class _TorchCheckpointModel:
@@ -118,7 +138,17 @@ def load_plugins() -> dict[str, ModalityModel]:
     registry: dict[str, ModalityModel] = {}
 
     if s.IMAGE_MODEL_ID:
-        registry["image"] = _HFImageClassifier(s.IMAGE_MODEL_ID, s.IMAGE_MODEL_FAKE_INDEX)
+        ids = [m.strip() for m in s.IMAGE_MODEL_ID.split(",") if m.strip()]
+        idx_tokens = [t.strip() for t in str(s.IMAGE_MODEL_FAKE_INDEX).split(",") if t.strip()]
+        def _idx_for(i: int) -> int:
+            tok = idx_tokens[i] if i < len(idx_tokens) else (idx_tokens[0] if idx_tokens else "-1")
+            try:
+                return int(tok)
+            except ValueError:
+                return -1
+        members = [_HFImageClassifier(mid, _idx_for(i), s.IMAGE_MODEL_TTA)
+                   for i, mid in enumerate(ids)]
+        registry["image"] = members[0] if len(members) == 1 else _EnsembleImageModel(members)
 
     for modality, path in (
         ("image", s.IMAGE_MODEL_PATH),

@@ -108,6 +108,32 @@ IMAGE_MODEL_ID=dima806/deepfake_vs_real_image_detection IMAGE_MODEL_FAKE_INDEX=0
   python -m evaluation.evaluate --data /path/to/dataset
 ```
 
+### 3.2 Pushing higher — ensemble, TTA, and learned fusion
+
+Same 300-image set and protocol. Scripts: `evaluation/eval_image_models.py` (ensemble/TTA) and
+`evaluation/stack_eval.py` (5-fold cross-validated logistic-regression fusion).
+
+| Method | AUC ↑ | Accuracy ↑ | EER ↓ | Notes |
+|--------|------:|-----------:|------:|-------|
+| Best single ViT (`dima806`) | 0.779 | 0.753 | 0.243 | baseline |
+| Single ViT + TTA (h-flip) | 0.786 | 0.760 | 0.243 | negligible gain |
+| 2-ViT ensemble (`dima806`+`Wvolf`) + TTA | 0.782 | 0.757 | 0.257 | no AUC gain — the two ViTs are correlated; slightly better ECE |
+| **Learned fusion — LR[dima + wvolf + engine], 5-fold CV** | **0.820** | **0.780** | **0.237** | **+0.04 AUC over the best single model** |
+
+**Key insight (validates the multimodal thesis).** The interpretable engine is chance-level *alone*
+(AUC 0.273 — i.e. 0.727 once its sign is corrected), yet it carries **complementary** signal: adding
+it to the learned combiner lifts AUC from 0.78 to **0.82**. A weak, transparent forensic signal makes
+a strong trained model measurably better — which is exactly what a multimodal platform should do.
+
+**Honest caveats.** (a) 5-fold CV on a single dataset can share identities across folds, so the gain
+may be slightly optimistic; (b) n = 300, so expect ±0.02–0.03 noise; (c) the learned combiner's weights
+are dataset-specific and are **not** shipped as product defaults — to productionise, train the combiner
+on a disjoint, identity-split corpus and persist those weights behind the same plugin interface.
+
+**Takeaways for "going higher":** stacking a complementary forensic signal onto the trained model gave
+the only real AUC gain here (+0.04); naive ensembling of two similar ViTs and TTA did not. The next
+steps for materially higher numbers are in-domain fine-tuning and cross-generator training.
+
 ## 4. Harness self-test (synthetic — NOT real-world accuracy)
 
 To prove the harness works without downloading anything, generate a labelled **synthetic** set and
@@ -142,9 +168,11 @@ Representative result on 30 controlled synthetic files (15 real / 15 fake):
 
 ## 5. Bottom line
 
-- **Measured on a real public GAN-face set (300 images), same harness both times:**
+- **Measured on a real public GAN-face set (300 images), same harness throughout:**
   - Interpretable engine alone: **AUC 0.273, ~50% (chance)** — it does not generalise to this generator.
-  - **Trained-ViT plugin: AUC 0.780, ~75% accuracy** — the trained-model path delivers real detection.
+  - Trained-ViT plugin: **AUC 0.780, ~75% accuracy** — the trained-model path delivers real detection.
+  - **Learned fusion (ViTs + engine, 5-fold CV): AUC 0.820, ~78% accuracy** — the best result; the
+    engine's complementary signal lifts the trained model by +0.04 AUC.
 - Both numbers are reported openly; nothing was tuned on the test set (no leakage).
 - **The platform's value:** a complete multimodal pipeline + explainability (heatmaps, evidence, safety
   wording) + a drop-in trained-model slot + **this reproducible harness** that measures real performance

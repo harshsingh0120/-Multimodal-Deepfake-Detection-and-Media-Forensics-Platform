@@ -314,11 +314,13 @@ python -m evaluation.make_eval_dataset ./eval_synth && python -m evaluation.eval
   | Detector | AUC | Accuracy | EER |
   |----------|----:|---------:|----:|
   | Interpretable engine (baseline) | 0.273 | ~50% (chance) | 0.730 |
-  | **Trained ViT plugin** (`dima806`, `IMAGE_MODEL_FAKE_INDEX=0`) | **0.780** | **75.3%** | 0.267 |
+  | Trained ViT plugin (`dima806`, `IMAGE_MODEL_FAKE_INDEX=0`) | 0.780 | 75.3% | 0.267 |
+  | **Learned fusion** (2 ViTs + engine, 5-fold CV) | **0.820** | **78.0%** | 0.237 |
 
-  The interpretable engine alone is chance-level on this generator; the **trained-model path lifts it to
-  AUC 0.78 / ~75%**. Enabling the plugin also surfaced (and we fixed) a reversed-`id2label` bug in the
-  pretrained model — see **[EVALUATION.md](EVALUATION.md)**.
+  The interpretable engine alone is chance-level on this generator; the trained-model path lifts it to
+  **AUC 0.78**, and **learned fusion that adds the engine's complementary signal reaches AUC 0.82** — the
+  weak forensic signal measurably improves the strong model. Enabling the plugin also surfaced (and we
+  fixed) a reversed-`id2label` bug in the pretrained model — full write-up in **[EVALUATION.md](EVALUATION.md)**.
 - **Honest evaluation:** nothing is tuned on the test set (the leakage pitfall the brief warns about).
   The engine is a transparent baseline/triage tool; the trained-model slot is where production accuracy
   comes from. Enable it with `pip install torch transformers` and `IMAGE_MODEL_ID` (see `.env.example`).
