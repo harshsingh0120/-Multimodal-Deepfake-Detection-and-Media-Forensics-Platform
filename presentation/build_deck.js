@@ -66,12 +66,14 @@ function slide(sectionTitle){ const s=p.addSlide(); bg(s); return s; }
   tx(s,"Multimodal Deepfake\nDetection & Media\nForensics Platform",{x:M,y:1.95,w:7.6,h:2.3,fontSize:34,bold:true,color:INK,fontFace:HEAD,lineSpacingMultiple:1.0});
   tx(s,"Catching fakes across image, video and audio — with evidence, not guesswork.",
      {x:M,y:3.95,w:7.4,h:0.7,fontSize:15,italic:true,color:TEAL});
-  rr(s,M,4.95,7.3,1.15,{fill:PANEL,line:STROKE,r:0.1});
-  tx(s,"TEAM",{x:M+0.25,y:5.1,w:2,h:0.3,fontSize:10,bold:true,color:MUTED,charSpacing:2});
-  tx(s,"[Your Team Name]  ·  [Member 1]  ·  [Member 2]  ·  [Member 3]",
-     {x:M+0.25,y:5.42,w:6.8,h:0.4,fontSize:14,bold:true,color:INK});
+  rr(s,M,4.82,7.45,1.55,{fill:PANEL,line:STROKE,r:0.1});
+  tx(s,"TEAM  ·  HIDE & SEEK",{x:M+0.25,y:4.96,w:6.95,h:0.3,fontSize:12,bold:true,color:TEAL,charSpacing:1});
+  tx(s,"Harsh Kumar Singh (MC25B1003)   ·   Tejus Yadav (MC25B1003)",
+     {x:M+0.25,y:5.32,w:6.95,h:0.32,fontSize:12,bold:true,color:INK});
+  tx(s,"Harshvardhan Mune (ADB1022)",
+     {x:M+0.25,y:5.66,w:6.95,h:0.32,fontSize:12,bold:true,color:INK});
   tx(s,"github.com/harshsingh0120/-Multimodal-Deepfake-Detection-and-Media-Forensics-Platform",
-     {x:M,y:6.25,w:7.4,h:0.3,fontSize:10,color:MUTED,fontFace:MONO});
+     {x:M+0.25,y:6.03,w:6.95,h:0.3,fontSize:9.5,color:MUTED,fontFace:MONO});
   foot(s,1);
   s.addNotes("Welcome. We built the Multimodal Deepfake Detection & Media Forensics Platform for Problem 02. "+
    "In one line: upload an image, video or audio clip and get back a structured, explainable report on how likely it is to be manipulated — across every modality, not just one. "+
@@ -567,11 +569,12 @@ function slide(sectionTitle){ const s=p.addSlide(); bg(s); return s; }
   tx(s,"Thank you",{x:M,y:2.1,w:9,h:1.1,fontSize:52,bold:true,color:INK,fontFace:HEAD});
   tx(s,"Multimodal Deepfake Detection & Media Forensics Platform",{x:M,y:3.3,w:11,h:0.6,fontSize:18,color:TEAL,bold:true});
   tx(s,"We'd love your questions.",{x:M,y:3.95,w:9,h:0.5,fontSize:16,italic:true,color:MUTED});
-  rr(s,M,4.75,12.1,1.5,{fill:PANEL,line:STROKE,r:0.1,shadow:true});
-  tx(s,"TEAM",{x:M+0.25,y:4.92,w:3,h:0.3,fontSize:11,bold:true,color:MUTED,charSpacing:2});
-  tx(s,"[Your Team Name]   ·   [Member 1]   ·   [Member 2]   ·   [Member 3]",{x:M+0.25,y:5.25,w:11.5,h:0.4,fontSize:15,bold:true,color:INK});
+  rr(s,M,4.7,12.1,1.65,{fill:PANEL,line:STROKE,r:0.1,shadow:true});
+  tx(s,"TEAM  ·  HIDE & SEEK",{x:M+0.25,y:4.85,w:8,h:0.35,fontSize:15,bold:true,color:TEAL,charSpacing:1});
+  tx(s,"Harsh Kumar Singh (MC25B1003)    ·    Tejus Yadav (MC25B1003)    ·    Harshvardhan Mune (ADB1022)",
+     {x:M+0.25,y:5.3,w:11.6,h:0.4,fontSize:14,bold:true,color:INK});
   tx(s,"github.com/harshsingh0120/-Multimodal-Deepfake-Detection-and-Media-Forensics-Platform",
-     {x:M+0.25,y:5.75,w:11.5,h:0.3,fontSize:11,color:TEAL,fontFace:MONO});
+     {x:M+0.25,y:5.82,w:11.6,h:0.3,fontSize:11,color:TEAL,fontFace:MONO});
   foot(s,22);
   s.addNotes("Thank you — we're happy to take questions. If a judge is quiet, prompt them: would you like to see the live demo, dig into the lip-sync math, or discuss how we measured accuracy honestly? Have the repo open and the local server running at localhost:8000 so you can show anything on request.");
 })();
