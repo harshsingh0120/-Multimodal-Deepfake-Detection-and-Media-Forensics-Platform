@@ -19,9 +19,10 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import (HRFlowable, ListFlowable, ListItem, Paragraph,
-                                Preformatted, SimpleDocTemplate, Spacer, Table,
-                                TableStyle)
+from reportlab.platypus import (HRFlowable, Image, ListFlowable, ListItem,
+                                Paragraph, Preformatted, SimpleDocTemplate, Spacer,
+                                Table, TableStyle)
+from reportlab.lib.utils import ImageReader
 
 # Map glyphs the base-14 fonts don't have to safe ASCII; strip the rest.
 _GLYPHS = {
@@ -140,6 +141,17 @@ def convert(md_path: Path, pdf_path: Path):
             continue
 
         s = line.strip()
+        img_m = re.match(r"^!\[[^\]]*\]\(([^)]+)\)$", s)
+        if img_m:                                     # embedded image
+            flush_bullets()
+            img_path = (md_path.parent / img_m.group(1)).resolve()
+            if img_path.exists():
+                iw, ih = ImageReader(str(img_path)).getSize()
+                w = min(avail, iw * 0.75)
+                story.append(Image(str(img_path), width=w, height=w * ih / iw))
+                story.append(Spacer(1, 6))
+            i += 1
+            continue
         if not s:
             flush_bullets()
             story.append(Spacer(1, 4))
