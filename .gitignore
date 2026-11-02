@@ -42,3 +42,7 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# presentation deliverables
+!presentation/**/*.pdf
+presentation/node_modules/
